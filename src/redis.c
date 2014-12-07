@@ -1453,6 +1453,9 @@ void initServerConfig(void) {
     server.assert_line = 0;
     server.bug_report_start = 0;
     server.watchdog_period = 0;
+
+    /* modules */
+    server.modules = listCreate();
 }
 
 /* This function will try to raise the max number of open files accordingly to
@@ -2448,7 +2451,8 @@ void bytesToHuman(char *s, unsigned long long n) {
 sds genRedisInfoString(char *section) {
     sds info = sdsempty();
     time_t uptime = server.unixtime-server.stat_starttime;
-    int j, numcommands;
+    int j;
+    //int j, numcommands;
     struct rusage self_ru, c_ru;
     unsigned long lol, bib;
     int allsections = 0, defsections = 0;
@@ -2838,6 +2842,20 @@ sds genRedisInfoString(char *section) {
     if (allsections || !strcasecmp(section,"commandstats")) {
         if (sections++) info = sdscat(info,"\r\n");
         info = sdscatprintf(info, "# Commandstats\r\n");
+
+        dictIterator *iter = dictGetIterator(server.commands);
+        dictEntry *node = NULL;
+        while ((node = dictNext(iter))) {
+            struct redisCommand *c = (struct redisCommand*)node->v.val;
+
+            if (!c->calls) continue;
+            info = sdscatprintf(info,
+                "cmdstat_%s:calls=%lld,usec=%lld,usec_per_call=%.2f\r\n",
+                c->name, c->calls, c->microseconds,
+                (c->calls == 0) ? 0 : ((float)c->microseconds/c->calls));
+        }
+        dictReleaseIterator(iter);
+/*
         numcommands = sizeof(redisCommandTable)/sizeof(struct redisCommand);
         for (j = 0; j < numcommands; j++) {
             struct redisCommand *c = redisCommandTable+j;
@@ -2848,6 +2866,7 @@ sds genRedisInfoString(char *section) {
                 c->name, c->calls, c->microseconds,
                 (c->calls == 0) ? 0 : ((float)c->microseconds/c->calls));
         }
+*/
     }
 
     /* Key space */
@@ -2865,6 +2884,23 @@ sds genRedisInfoString(char *section) {
                     j, keys, vkeys, server.db[j].avg_ttl);
             }
         }
+    }
+
+    /* Modules */
+    if (allsections || defsections || !strcasecmp(section,"modules")) {
+        if (sections++) info = sdscat(info,"\r\n");
+        info = sdscatprintf(info, "# Modules\r\n");
+
+        listIter *iter = listGetIterator(server.modules, AL_START_HEAD);
+        listNode *node = NULL;
+        while ((node = listNext(iter))) {
+            struct redisModuleInfo *m = (struct redisModuleInfo*)node->value;
+
+            info = sdscatprintf(info,
+                "module_%s:%s\r\n",
+                m->module->name, m->path);
+        }
+        listReleaseIterator(iter);
     }
     return info;
 }

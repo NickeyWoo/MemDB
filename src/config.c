@@ -79,6 +79,7 @@ void resetServerSaveParams(void) {
 }
 
 void loadServerConfigFromString(char *config) {
+    char errbuf[256];
     char *err = NULL;
     int linenum = 0, totlines, i;
     sds *lines;
@@ -501,6 +502,22 @@ void loadServerConfigFromString(char *config) {
                 }
                 err = sentinelHandleConfiguration(argv+1,argc-1);
                 if (err) goto loaderr;
+            }
+        } else if (!strcasecmp(argv[0],"module")) {
+            if(argc > 1)
+            {
+                if(REDIS_OK != redisLoadModule(argv[1]))
+                {
+                    snprintf(errbuf, 256, "load module fail");
+                    err = errbuf;
+                    goto loaderr;
+                }
+            }
+            else
+            {
+                snprintf(errbuf, 256, "not found module");
+                err = errbuf;
+                goto loaderr;
             }
         } else {
             err = "Bad directive or wrong number of arguments"; goto loaderr;
