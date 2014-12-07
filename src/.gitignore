@@ -5,6 +5,8 @@ redis.info
 lcov-html
 *.o
 *.swp
+.make-*
+release.h
 redis-benchmark
 redis-cli
 redis-check-aof
