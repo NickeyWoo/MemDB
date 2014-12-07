@@ -1,0 +1,13 @@
+*.gcda
+*.gcno
+*.gcov
+redis.info
+lcov-html
+*.o
+*.swp
+redis-benchmark
+redis-cli
+redis-check-aof
+redis-check-dump
+redis-server
+redis-sentinel
