@@ -1,2 +1,3 @@
 deps
 redis.conf
+dump.rdb
