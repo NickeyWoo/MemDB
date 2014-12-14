@@ -13,3 +13,5 @@ redis-check-aof
 redis-check-dump
 redis-server
 redis-sentinel
+memdb
+memdbd
