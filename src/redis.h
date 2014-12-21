@@ -198,6 +198,7 @@ typedef long long mstime_t; /* millisecond time type. */
 #define REDIS_ENCODING_ZIPLIST 5 /* Encoded as ziplist */
 #define REDIS_ENCODING_INTSET 6  /* Encoded as intset */
 #define REDIS_ENCODING_SKIPLIST 7  /* Encoded as skiplist */
+#define REDIS_ENCODING_RBTREE 8 /* Encoded as red-black tree */
 
 /* Defines related to the dump file format. To store 32 bits lengths for short
  * keys requires a lot of space, so we check the most significant 2 bits of
@@ -563,6 +564,22 @@ typedef struct zset {
     dict *dict;
     zskiplist *zsl;
 } zset;
+
+/* red-black tree */
+typedef struct rbNode {
+    unsigned color:1;
+    struct rbNode *parent;
+    struct rbNode *left, *right;
+    robj *obj;
+} rbNode;
+
+typedef struct rbtree {
+    rbNode *root;
+    unsigned long length;
+} rbtree;
+
+rbtree *createRbtree();
+void releaseRbtree(rbtree *tree);
 
 typedef struct clientBufferLimitsConfig {
     unsigned long long hard_limit_bytes;
