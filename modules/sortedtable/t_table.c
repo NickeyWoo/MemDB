@@ -37,7 +37,7 @@
 
 robj* createTableObject() {
 
-    robj *o = createObject(REDIS_TABLE, );
+    robj *o = NULL;
     return o;
 }
 

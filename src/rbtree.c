@@ -30,21 +30,123 @@
 
 #include "redis.h"
 
-rbtree *createRbtree()
+rbtree *rbtreeCreate()
 {
-    rbtree *tree = zmalloc(sizeof(*tree));
-    tree->root = NULL;
-    tree->length = 0;
-    return tree;
+    return rbtreeCreateWithCompare(rbtreeCompare);
 }
 
-void releaseRbtree(rbtree *tree)
+rbtree *rbtreeCreateWithCompare(int (*compare)(robj *v1, robj *v2))
+{
+    rbtree *t = zmalloc(sizeof(*t));
+    t->root = NULL;
+    t->compare = compare;
+    t->length = 0;
+    return t;
+}
+
+void rbtreeRelease(rbtree *tree)
 {
 
     zfree(tree);
 }
 
+int rbtreeCompare(robj *v1, robj *v2)
+{
+    return 0;
+}
 
+rbNode *rbtreeCreateNode(robj *obj)
+{
+    rbNode *n = zmalloc(sizeof(*n));
+    n->color = RBNODE_RED;
+    n->parent = n->left = n->right = NULL;
+    n->obj = obj;
+    incrRefCount(obj);
+    return n;
+}
 
+void rbtreeReleaseNode(rbNode *n)
+{
+    decrRefCount(n->obj);
+    zfree(n);
+}
+
+rbNode *rbtreeInsert(rbtree *tree, rbNode *n)
+{
+    return NULL;
+}
+
+rbNode *rbtreeDelete(rbtree *tree, rbNode *n)
+{
+    return NULL;
+}
+
+rbNode *rbtreeSearch(rbtree *tree, robj *obj)
+{
+    int c;
+    rbNode *n = tree->root;
+    while (n) {
+        c = tree->compare(n->obj, obj);
+        if ( c == 0 ) {
+            return n;
+        } else if ( c < 0 ) {
+            n = n->right;
+        } else {
+            n = n->left;
+        }
+    }
+    return NULL;
+}
+
+rbNode *rbtreeNearby(rbtree *tree, robj *obj)
+{
+    int c;
+    rbNode *parent = NULL, **node = &tree->root;
+    while ( *node ) {
+        c = tree->compare((*node)->obj, obj);
+        parent = *node;
+        if ( c == 0 ) {
+            return (*node);
+        } else if ( c < 0 ) {
+            node = &((*node)->right);
+        } else {
+            node = &((*node)->left);
+        }
+    }
+    if ( !parent )
+        return NULL;
+    else if ( node == &parent->right )
+        return parent->parent;
+    else
+        return parent;
+}
+
+rbNode *rbtreeNext(rbNode *n)
+{
+    rbNode *mini, *parent;
+    if ( n->right ) {
+        mini = rbtreeMinimun(n->right);
+        return mini;
+    } else {
+        while ( (parent = n->parent) && n == parent->right ) {
+            n = parent;
+        }
+        return parent;
+    }
+}
+
+rbNode *rbtreeMinimun(rbNode *n)
+{
+    while ( n && n->left )
+        n = n->left;
+    return n;
+}
+
+rbNode *rbtreeMaximum(rbNode *n)
+{
+    while ( n && n->right )
+        n = n->right;
+    return n;
+}
 
 

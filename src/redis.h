@@ -575,11 +575,31 @@ typedef struct rbNode {
 
 typedef struct rbtree {
     rbNode *root;
+    int (*compare)(robj *v1, robj *v2);
     unsigned long length;
 } rbtree;
 
-rbtree *createRbtree();
-void releaseRbtree(rbtree *tree);
+#define RBNODE_RED      0
+#define RBNODE_BLACK    1
+
+#define rbtreeLength(t) ((t)->length)
+#define rbtreeIsRed(n) ((n)->color == RBNODE_RED)
+#define rbtreeIsBlack(n) ((n)->color == RBNODE_BLACK)
+
+rbtree *rbtreeCreate();
+rbtree *rbtreeCreateWithCompare(int (*compare)(robj *v1, robj *v2));
+void rbtreeRelease(rbtree *tree);
+int rbtreeCompare(robj *v1, robj *v2);
+rbNode *rbtreeCreateNode(robj *obj);
+void rbtreeReleaseNode(rbNode *n);
+rbNode *rbtreeInsert(rbtree *tree, rbNode *n);
+rbNode *rbtreeDelete(rbtree *tree, rbNode *n);
+rbNode *rbtreeSearch(rbtree *tree, robj *obj); /* return equal *obj rbNode */
+rbNode *rbtreeNearby(rbtree *tree, robj *obj); /* return greater or equal than *obj rbNode */
+rbNode *rbtreeNext(rbNode *n);
+
+rbNode *rbtreeMinimun(rbNode *n);
+rbNode *rbtreeMaximun(rbNode *n);
 
 typedef struct clientBufferLimitsConfig {
     unsigned long long hard_limit_bytes;
