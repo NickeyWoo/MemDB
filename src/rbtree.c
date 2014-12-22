@@ -30,6 +30,8 @@
 
 #include "redis.h"
 
+void rbtreeReleaseSubtree(rbNode *n);
+
 rbtree *rbtreeCreate()
 {
     return rbtreeCreateWithCompare(rbtreeCompare);
@@ -44,9 +46,25 @@ rbtree *rbtreeCreateWithCompare(int (*compare)(robj *v1, robj *v2))
     return t;
 }
 
+void rbtreeReleaseSubtree(rbNode *n)
+{
+    if ( !n ) return;
+
+    if ( n->left ) {
+        rbtreeReleaseSubtree(n->left);
+        n->left = NULL;
+    }
+    if ( n->right ) {
+        rbtreeReleaseSubtree(n->right);
+        n->right = NULL;
+    }
+
+    rbtreeReleaseNode(n);
+}
+
 void rbtreeRelease(rbtree *tree)
 {
-
+    rbtreeReleaseSubtree(tree->root);
     zfree(tree);
 }
 
