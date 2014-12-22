@@ -116,19 +116,33 @@ rbNode *rbtreeNearby(rbtree *tree, robj *obj)
     if ( !parent )
         return NULL;
     else if ( node == &parent->right )
-        return parent->parent;
+        return rbtreeNext(parent);
     else
         return parent;
 }
 
 rbNode *rbtreeNext(rbNode *n)
 {
-    rbNode *mini, *parent;
+    rbNode *min, *parent;
     if ( n->right ) {
-        mini = rbtreeMinimun(n->right);
-        return mini;
+        min = rbtreeMinimun(n->right);
+        return min;
     } else {
         while ( (parent = n->parent) && n == parent->right ) {
+            n = parent;
+        }
+        return parent;
+    }
+}
+
+rbNode *rbtreePrev(rbNode *n)
+{
+    rbNode *max, *parent;
+    if ( n->left ) {
+        max = rbtreeMaximun(n->left);
+        return max;
+    } else {
+        while ( (parent = n->parent) && n == parent->left ) {
             n = parent;
         }
         return parent;
@@ -142,7 +156,7 @@ rbNode *rbtreeMinimun(rbNode *n)
     return n;
 }
 
-rbNode *rbtreeMaximum(rbNode *n)
+rbNode *rbtreeMaximun(rbNode *n)
 {
     while ( n && n->right )
         n = n->right;

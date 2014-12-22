@@ -597,7 +597,7 @@ rbNode *rbtreeDelete(rbtree *tree, rbNode *n);
 rbNode *rbtreeSearch(rbtree *tree, robj *obj); /* return equal *obj rbNode */
 rbNode *rbtreeNearby(rbtree *tree, robj *obj); /* return greater or equal than *obj rbNode */
 rbNode *rbtreeNext(rbNode *n);
-
+rbNode *rbtreePrev(rbNode *n);
 rbNode *rbtreeMinimun(rbNode *n);
 rbNode *rbtreeMaximun(rbNode *n);
 
