@@ -571,12 +571,12 @@ typedef struct rbNode {
     struct rbNode *parent;
     struct rbNode *left, *right;
     robj *obj;
+    unsigned long left_count;
 } rbNode;
 
 typedef struct rbtree {
     rbNode *root;
     int (*compare)(robj *v1, robj *v2);
-    unsigned long length;
 } rbtree;
 
 #define RBNODE_RED      0
@@ -589,11 +589,10 @@ typedef struct rbtree {
 rbtree *rbtreeCreate();
 rbtree *rbtreeCreateWithCompare(int (*compare)(robj *v1, robj *v2));
 void rbtreeRelease(rbtree *tree);
-int rbtreeCompare(robj *v1, robj *v2);
 rbNode *rbtreeCreateNode(robj *obj);
 void rbtreeReleaseNode(rbNode *n);
-rbNode *rbtreeInsert(rbtree *tree, rbNode *n);
-rbNode *rbtreeDelete(rbtree *tree, rbNode *n);
+rbNode *rbtreeInsert(rbtree *tree, robj *obj);
+rbNode *rbtreeDelete(rbtree *tree, robj *obj);
 rbNode *rbtreeSearch(rbtree *tree, robj *obj); /* return equal *obj rbNode */
 rbNode *rbtreeNearby(rbtree *tree, robj *obj); /* return greater or equal than *obj rbNode */
 rbNode *rbtreeNext(rbNode *n);
